@@ -110,6 +110,3 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 ---
 
 > Made with ❤️ by **Ali Kamrani**
-
-میخوای این نسخه پیشرفته رو هم بسازم؟
-```
