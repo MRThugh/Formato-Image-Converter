@@ -1,0 +1,4 @@
+# Core dependencies for Formato Image Converter
+pillow>=10.0.0         # Image processing library
+tkinter                # GUI toolkit (usually comes pre-installed with Python)
+pyinstaller>=6.0.0     # To build standalone executables

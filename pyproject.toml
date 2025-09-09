@@ -1,0 +1,14 @@
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "formato"
+version = "0.1.0"
+description = "A small image format batch converter with Tkinter GUI"
+authors = [{name="formato author"}]
+requires-python = ">=3.10"
+
+[project.urls]
+homepage = "https://example.local/formato"

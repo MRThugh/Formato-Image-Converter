@@ -1,0 +1,1 @@
+Assets: icon.png and sample_images/

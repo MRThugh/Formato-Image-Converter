@@ -1,0 +1,35 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- Virtual Environments ----
+.venv/
+venv/
+env/
+ENV/
+.venv*/
+
+# ---- Distribution / Packaging ----
+build/
+dist/
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# ---- Installer Files ----
+Output/
+*.iss~
+*.exe
+
+# ---- Logs & Misc ----
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# ---- IDEs ----
+.vscode/
+.idea/
+*.swp
