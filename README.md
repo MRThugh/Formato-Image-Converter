@@ -35,9 +35,6 @@
   <img src="batch_converter.png" width="48%" alt="Batch Converter Tab" />
   <img src="icon_generator.png" width="48%" alt="Icon/Favicon Generator Tab" />
 </div>
-
-> Tip: Add your own screenshots to the `screenshots/` folder for a more personalized look.
-
 ---
 
 ## Download
