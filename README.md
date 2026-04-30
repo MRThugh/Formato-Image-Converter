@@ -1,10 +1,5 @@
 # 🎨 Formato - Professional Studio
-<p align="center">
-  <img 
-    src="https://raw.githubusercontent.com/MRThugh/MRThugh/main/badge.svg"
-    width="50%" 
-  />
-</p>
+
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
 ![CustomTkinter](https://img.shields.io/badge/CustomTkinter-Dark_UI-2b2b2b?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
@@ -109,5 +104,10 @@ We appreciate all help in making Formato even better ❤️
 **Built in silence by [MRThugh](https://github.com/MRThugh)**  
 ⭐ If you find Formato useful, please give it a star — it means a lot
 
-
+<p align="center">
+  <img 
+    src="https://raw.githubusercontent.com/MRThugh/MRThugh/main/badge.svg"
+    width="50%" 
+  />
+</p>
    
