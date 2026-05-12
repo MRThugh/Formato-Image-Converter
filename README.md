@@ -18,6 +18,7 @@
 ## 📖 The Philosophy
 In the modern digital workspace, content creators, developers, and photographers constantly juggle between multiple apps to resize images, compress them, add watermarks, build PDFs, and generate app icons. 
 
+
 **Formato V1.3** was born out of a simple philosophy: **Zero Friction, Maximum Power**. 
 It combines a sleek, modern UI (Dark Studio) with heavy-duty multithreaded processing underneath. Whether you need to process $10$ images or $10,000$ images, Formato does it flawlessly while giving you a real-time live preview of your edits.
 
