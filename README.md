@@ -1,108 +1,207 @@
-<div align="center">
+# 🎨 Formato - Professional Image Processing Studio
 
-# 🌌 Formato - Professional Studio
-**The Ultimate All-In-One Image Processing & Exporting Tool**
+<p align="center">
+  <img src="assets/logo.png" alt="Formato Logo" width="180">
+</p>
 
-![Version](https://img.shields.io/badge/Version-V1.3-blueviolet?style=for-the-badge&logo=appveyor)
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)
-![Open Source](https://img.shields.io/badge/Open_Source-%E2%9D%A4-red?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C-lightgrey?style=for-the-badge)
+<p align="center">
+  <strong>A powerful and modern desktop application for batch image processing, PDF generation, and icon creation.</strong>
+</p>
 
-[Explore Developer's GitHub](https://github.com/MRThugh)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/GUI-CustomTkinter-1f6feb?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Pillow-Image%20Processing-ff9800?style=for-the-badge">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge">
+</p>
 
-</div>
-
----
-
-## 📖 The Philosophy
-In the modern digital workspace, content creators, developers, and photographers constantly juggle between multiple apps to resize images, compress them, add watermarks, build PDFs, and generate app icons. 
-
-
-**Formato V1.3** was born out of a simple philosophy: **Zero Friction, Maximum Power**. 
-It combines a sleek, modern UI (Dark Studio) with heavy-duty multithreaded processing underneath. Whether you need to process $10$ images or $10,000$ images, Formato does it flawlessly while giving you a real-time live preview of your edits.
-
----
-
-## 🚀 Awesome Features
-
-Formato is packed with professional-grade capabilities divided into three main studio modules:
-
-### 1. ⚡ Batch Image Processor
-*   **Live Preview Engine:** Instantly see changes as you tweak brightness, contrast, or watermark settings.
-*   **Smart Compression:** Tell Formato your target file size (e.g., $500$ KB), and its binary-search compression algorithm will automatically find the best quality to hit that target!
-*   **Intelligent Resizing:** Resize using exact $W \times H$ dimensions. Choose between *Stretch*, *Fit (Maintain Aspect Ratio)*, or *Fill/Crop*.
-*   **Advanced Image Adjustments:** Tweak Brightness, Contrast, Saturation, and Sharpness on a scale from $0.2$ to $5.0$.
-*   **Filters & Enhancements:** 1-click Grayscale, Auto-Contrast, and Sharpen filters.
-*   **Dynamic Watermarking:** Add PNG logos, adjust opacity ($0.0$ to $1.0$), set precise positioning (Top, Bottom, Center), and define $X, Y$ margins.
-*   **Metadata Manager:** Strip EXIF data for privacy, or inject custom Author tags into thousands of images at once.
-*   **Preset System:** Save your perfect workflow as a `.json` preset and load it later with a single click.
-*   **Multi-Threading:** Utilizes concurrent processing to utilize $100\%$ of your CPU cores for blazing-fast exports.
-
-### 2. 📄 PDF Builder
-*   Drag and drop your images, order them in the queue, and instantly compile them into a beautiful, high-quality, single-file PDF document.
-
-### 3. 🎨 Icon & Favicon Generator
-*   Select a source image and generate complete Icon/Favicon packages in milliseconds.
-*   Supports standard web sizes ($16 \times 16$, $32 \times 32$) up to massive App icons ($512 \times 512$).
-*   Automatically packages them into perfect `.ico` formats and high-res `.png` sets.
+<p align="center">
+  <img src="https://img.shields.io/badge/Developed%20by-MRThugh-black?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Version-2.0.0-purple?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge">
+</p>
 
 ---
 
-## 🛠️ Installation
+## 🚀 Overview
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/MRThugh/Formato.git
-   cd Formato
-   ```
-2. Install the required dependencies:
-   ```bash
-   pip install customtkinter Pillow tkinterdnd2
-   ```
-   *(Note: `tkinterdnd2` is optional but highly recommended to enable Drag & Drop features!)*
+**Formato** is a professional-grade image processing suite built with Python and CustomTkinter.  
+It combines advanced batch conversion, live preview, watermarking, metadata editing, PDF exporting, and favicon/icon generation in a sleek desktop interface.
 
-3. Run the application:
-   ```bash
-   python main.py
-   ```
+Designed and developed by [MRThugh](https://github.com/MRThugh?utm_source=chatgpt.com), Formato demonstrates modern Python desktop engineering with multithreading, drag-and-drop support, and real-time image rendering.
 
 ---
 
-## 🎮 How to Use (V1.3)
+## ✨ Key Features
 
-### Batch Processing Images
-1. **Add Files:** Drag & drop images into the "Queue" area, or use the `➕ Add Files` button.
-2. **Preview:** Click on any file in the queue to load it into the **Live Preview** panel.
-3. **Tweak Settings:** 
-   * Select your output format (JPEG, PNG, WEBP, TIFF, BMP).
-   * Apply filters, adjust dimensions, or set up a watermark.
-   * *Pro-tip: Enable "Smart Compression" to keep files under a specific KB size!*
-4. **Select Destination:** Click the folder icon 📁 at the bottom right to choose where the processed files will be saved.
-5. **Start:** Hit **🚀 START PROCESSING**.
+### ⚡ Batch Image Processing
+- Convert images to JPEG, PNG, WEBP, TIFF, and BMP
+- Multi-threaded high-speed processing
+- Individual progress bars for each file
+- Drag & Drop support
 
-### Exporting to PDF
-1. Go to the **📄 PDF Export** tab on the left sidebar.
-2. Ensure you have added your images to the Queue (in the Batch tab).
-3. Click **Export to PDF**, choose your save location, and Formato will combine them instantly.
+### 👁️ Live Preview Engine
+- Real-time image preview
+- Debounced rendering for smooth performance
+- Instant updates while adjusting settings
 
-### Generating Icons
-1. Go to the **🎨 Icon Generator** tab.
-2. Select your high-resolution source image.
-3. Choose your target type (*Favicon* or *App Icon*) to auto-select standard sizes, or manually check the sizes you need.
-4. Click **⚡ Generate Icons** and pick a save folder.
+### 📏 Smart Resize
+- Stretch
+- Fit while maintaining aspect ratio
+- Fill and crop
+- Automatic dimension calculation
+
+### 🎨 Advanced Adjustments
+- Brightness
+- Contrast
+- Saturation
+- Sharpness
+
+### 🧠 Smart Compression
+- Target file size in KB
+- Binary search quality optimization
+- Automatic best-quality output
+
+### 🖼️ Watermark System
+- PNG watermark support with transparency
+- Adjustable size and opacity
+- Custom margins
+- Multiple placement options
+
+### 🏷️ Metadata Management
+- Preserve original EXIF data
+- Add custom author/artist metadata
+
+### 📄 PDF Builder
+- Combine multiple images into a single PDF
+
+### 🎨 Icon & Favicon Generator
+- Generate `.ico` files
+- Export multiple PNG sizes
+- Web and application presets
+
+### 💾 Preset System
+- Save settings to JSON
+- Load saved configurations instantly
 
 ---
 
-## 👨‍💻 Author
+## 🖼️ Supported Formats
 
-Created with ❤️ by **Ali Kamrani**
-
-*   GitHub: [@MRThugh](https://github.com/MRThugh)
-
-Feel free to star ⭐ the repository if you find this tool helpful, and open issues or pull requests to contribute to the next version!
+| Input | Output |
+|------|------|
+| JPG / JPEG | JPEG |
+| PNG | PNG |
+| WEBP | WEBP |
+| TIFF | TIFF |
+| BMP | BMP |
+| GIF | BMP / PNG / JPEG / WEBP |
 
 ---
-<div align="center">
-  <sub>Built with Python & CustomTkinter</sub>
-</div>
+
+## 🛠️ Technology Stack
+
+- :contentReference[oaicite:1]{index=1}
+- :contentReference[oaicite:2]{index=2}
+- :contentReference[oaicite:3]{index=3}
+- :contentReference[oaicite:4]{index=4}
+- :contentReference[oaicite:5]{index=5}
+
+---
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/MRThugh/Formato.git
+cd Formato
+pip install -r requirements.txt
+python formato.py
+````
+
+---
+
+## 📋 Requirements
+
+```txt
+customtkinter
+Pillow
+tkinterdnd2
+```
+
+---
+
+## 🏗️ Architecture Highlights
+
+* Object-Oriented design
+* Modular helper functions
+* Multi-threaded processing
+* Real-time preview engine
+* Smart compression algorithm
+* JSON-based preset management
+
+---
+
+## 🧠 Notable Algorithms
+
+### Binary Search Smart Compression
+
+Formato automatically finds the highest possible image quality while staying below a user-defined file size limit.
+
+### Debounced Live Preview
+
+Rendering updates are delayed intelligently to prevent excessive processing during rapid adjustments.
+
+### Concurrent Batch Processing
+
+Multiple images are processed simultaneously using Python's `ThreadPoolExecutor`.
+
+---
+
+## 🎯 Project Goals
+
+Formato was created to provide:
+
+* Professional image processing tools
+* Modern desktop UI/UX
+* Efficient multi-threaded performance
+* Real-world utility for developers and designers
+* A showcase of advanced Python engineering skills
+
+---
+
+## 👨‍💻 Developer
+
+**Ali Kamrani**
+GitHub: [MRThugh](https://github.com/MRThugh?utm_source=chatgpt.com)
+
+---
+
+## 🌟 Why This Project Matters
+
+Formato is more than an image converter. It is a complete desktop application demonstrating:
+
+* Advanced GUI development
+* Image processing expertise
+* Multithreading
+* File handling
+* Metadata management
+* Software architecture principles
+
+This project reflects the technical growth and engineering mindset of its developer, [MRThugh](https://github.com/MRThugh?utm_source=chatgpt.com).
+
+---
+
+## 📜 License
+
+MIT License
+
+---
+
+## ⭐ Support the Project
+
+If you find this project useful, please consider starring the repository on [GitHub](https://github.com/MRThugh/Formato?utm_source=chatgpt.com).
+
+<p align="center">
+  <strong>Built with passion by Ali Kamrani (MRThugh)</strong>
+</p>
+```
