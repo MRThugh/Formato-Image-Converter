@@ -1,7 +1,7 @@
 # 🎨 Formato - Professional Image Processing Studio
 
 <p align="center">
-  <img src="assets/logo.png" alt="Formato Logo" width="180">
+  <img src="logo.png" alt="Formato Logo" width="180">
 </p>
 
 <p align="center">
