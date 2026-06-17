@@ -8,6 +8,7 @@ import tkinter.filedialog as filedialog
 from tkinter import messagebox
 import json
 import time
+import io
 
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
@@ -26,13 +27,22 @@ WINDOW_ICON_PATH = "assets/icon.ico"
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
+def parse_int(val, default=10):
+    try:
+        return int(float(str(val).strip()))
+    except (ValueError, TypeError):
+        return default
+
 class FormatoApp(BaseClass):
     def __init__(self):
         super().__init__()
         
         # If BaseClass is TkinterDnD.Tk, we need to explicitly set it up to act like a CTk window
         if HAS_DND and not isinstance(self, ctk.CTk):
-            self.configure(bg=ctk.ThemeManager.theme["CTk"]["fg_color"][1])
+            try:
+                self.configure(bg=ctk.ThemeManager.theme["CTk"]["fg_color"][1])
+            except:
+                self.configure(bg="#242424")
             
         self.title("Formato - Professional Studio")
         self.geometry("1400x950")
@@ -56,6 +66,7 @@ class FormatoApp(BaseClass):
         self.output_folder = ctk.StringVar()
         self.selected_files = []
         self.progress_bars = {}
+        self.thumbnails = {}  # References to keep thumbnail CTkImages alive
 
         # Watermark & Renaming Variables
         self.watermark_path = ctk.StringVar(value="")
@@ -82,6 +93,8 @@ class FormatoApp(BaseClass):
         # Metadata Manager
         self.meta_enable = ctk.BooleanVar(value=False)
         self.meta_author = ctk.StringVar(value="")
+        self.meta_copyright = ctk.StringVar(value="")
+        self.meta_description = ctk.StringVar(value="")
 
         # Smart Compression
         self.smart_compress = ctk.BooleanVar(value=False)
@@ -128,7 +141,6 @@ class FormatoApp(BaseClass):
                 self.set_preview_image(new_files[0])
 
     def split_dnd_files(self, data):
-        # Handle cross-platform file paths from drag and drop correctly using tk.splitlist
         if hasattr(self, 'tk'):
             return self.tk.splitlist(data)
         if data.startswith('{'):
@@ -204,11 +216,13 @@ class FormatoApp(BaseClass):
         left_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
         left_panel.grid_rowconfigure(1, weight=1) # File list
         left_panel.grid_rowconfigure(3, weight=1) # Preview
+        left_panel.grid_columnconfigure(0, weight=1)
 
         # --- Queue Section ---
         queue_frame = ctk.CTkFrame(left_panel, fg_color="#2B2B2B", corner_radius=10)
         queue_frame.grid(row=0, column=0, rowspan=2, sticky="nsew", pady=(0, 10))
         queue_frame.grid_rowconfigure(1, weight=1)
+        queue_frame.grid_columnconfigure(0, weight=1)
 
         title_lbl = ctk.CTkLabel(queue_frame, text="Queue (Drag & Drop Supported)", font=ctk.CTkFont(size=18, weight="bold"))
         title_lbl.grid(row=0, column=0, sticky="w", padx=20, pady=(15, 5))
@@ -218,8 +232,7 @@ class FormatoApp(BaseClass):
 
         btns = ctk.CTkFrame(queue_frame, fg_color="transparent")
         btns.grid(row=2, column=0, sticky="ew", padx=15, pady=15)
-        btns.grid_columnconfigure((0,1), weight=1)
-
+        
         ctk.CTkButton(btns, text="➕ Add Files", height=35, command=self.add_files).pack(side="left", padx=5, fill="x", expand=True)
         ctk.CTkButton(btns, text="🗑 Clear", height=35, fg_color="#5C3A3A", hover_color="#7A4C4C", command=self.clear_files).pack(side="right", padx=5, fill="x", expand=True)
 
@@ -243,7 +256,7 @@ class FormatoApp(BaseClass):
 
         # Card 1: Output Settings & Smart Compress
         card_out = self.create_card(right_scroll, "Output Format")
-        ctk.CTkComboBox(card_out, values=["JPEG", "PNG", "WEBP", "TIFF", "BMP"], variable=self.output_format).pack(fill="x", pady=5)
+        ctk.CTkComboBox(card_out, values=["JPEG", "PNG", "WEBP", "TIFF", "BMP", "GIF"], variable=self.output_format).pack(fill="x", pady=5)
         
         qual_frame = ctk.CTkFrame(card_out, fg_color="transparent")
         qual_frame.pack(fill="x", pady=(5,0))
@@ -287,11 +300,16 @@ class FormatoApp(BaseClass):
         ctk.CTkCheckBox(card_enh, text="Auto-Contrast", variable=self.filter_auto, command=self.trigger_preview_update).pack(side="left", padx=(0, 10))
         ctk.CTkCheckBox(card_enh, text="Sharpen", variable=self.filter_sharp, command=self.trigger_preview_update).pack(side="left")
 
-        # Card 5: Metadata
+        # Card 5: Metadata (Expanded)
         card_meta = self.create_card(right_scroll, "Metadata Manager")
         ctk.CTkCheckBox(card_meta, text="Preserve Original EXIF", variable=self.preserve_exif).pack(anchor="w", pady=(0, 5))
         ctk.CTkCheckBox(card_meta, text="Write Custom Metadata", variable=self.meta_enable).pack(anchor="w", pady=(0, 5))
-        ctk.CTkEntry(card_meta, textvariable=self.meta_author, placeholder_text="Author Name").pack(fill="x")
+        
+        meta_inputs_frame = ctk.CTkFrame(card_meta, fg_color="transparent")
+        meta_inputs_frame.pack(fill="x", pady=(5, 0))
+        ctk.CTkEntry(meta_inputs_frame, textvariable=self.meta_author, placeholder_text="Author Name").pack(fill="x", pady=2)
+        ctk.CTkEntry(meta_inputs_frame, textvariable=self.meta_copyright, placeholder_text="Copyright Info").pack(fill="x", pady=2)
+        ctk.CTkEntry(meta_inputs_frame, textvariable=self.meta_description, placeholder_text="Image Description / Caption").pack(fill="x", pady=2)
 
         # Card 6: Watermark & Rename
         card_wm = self.create_card(right_scroll, "Watermark & Renaming")
@@ -348,17 +366,23 @@ class FormatoApp(BaseClass):
     def _add_slider_row(self, parent, label, variable, min_val, max_val):
         frame = ctk.CTkFrame(parent, fg_color="transparent")
         frame.pack(fill="x", pady=2)
-        ctk.CTkLabel(frame, text=label, width=80, anchor="w").pack(side="left")
+        
+        lbl_name = ctk.CTkLabel(frame, text=label, width=80, anchor="w")
+        lbl_name.pack(side="left")
+        
         slider = ctk.CTkSlider(frame, from_=min_val, to=max_val, variable=variable, command=lambda _: self.trigger_preview_update())
         slider.pack(side="left", fill="x", expand=True, padx=10)
         
-        # Double click label to reset
+        lbl_val = ctk.CTkLabel(frame, text="1.0", width=30)
+        lbl_val.pack(side="right")
+        
+        # Double click label or name to reset
         def reset(e):
             variable.set(1.0)
             self.trigger_preview_update()
-        lbl_val = ctk.CTkLabel(frame, text="1.0", width=30)
-        lbl_val.pack(side="right")
+            
         lbl_val.bind("<Double-Button-1>", reset)
+        lbl_name.bind("<Double-Button-1>", reset)
         
         def update_lbl(*args):
             lbl_val.configure(text=f"{variable.get():.1f}")
@@ -440,6 +464,8 @@ class FormatoApp(BaseClass):
             "preserve_exif": self.preserve_exif.get(),
             "meta_enable": self.meta_enable.get(),
             "meta_author": self.meta_author.get(),
+            "meta_copyright": self.meta_copyright.get(),
+            "meta_description": self.meta_description.get(),
             "adj_brightness": self.adj_brightness.get(),
             "adj_contrast": self.adj_contrast.get(),
             "adj_saturation": self.adj_saturation.get(),
@@ -474,6 +500,8 @@ class FormatoApp(BaseClass):
             self.preserve_exif.set(data.get("preserve_exif", True))
             self.meta_enable.set(data.get("meta_enable", False))
             self.meta_author.set(data.get("meta_author", ""))
+            self.meta_copyright.set(data.get("meta_copyright", ""))
+            self.meta_description.set(data.get("meta_description", ""))
             self.adj_brightness.set(data.get("adj_brightness", 1.0))
             self.adj_contrast.set(data.get("adj_contrast", 1.0))
             self.adj_saturation.set(data.get("adj_saturation", 1.0))
@@ -509,33 +537,35 @@ class FormatoApp(BaseClass):
         self.preview_pending = False
         params = self._get_current_params()
         
-        # Calculate resize dimensions for preview
+        # Calculate resize dimensions for preview safely in the main thread
         try:
-            w_str, h_str = self.resize_width.get().strip(), self.resize_height.get().strip()
-            # We don't apply the actual resize dimensions to the preview to save memory, 
-            # but we use the ratio if needed. We will just use thumbnail logic to simulate it.
-            params["resize"] = get_resize_dimensions((1000, 1000), w_str, h_str) # dummy check for validity
+            w_str, h_str = params["res_w_str"], params["res_h_str"]
+            params["resize"] = get_resize_dimensions((1000, 1000), w_str, h_str)
         except:
             params["resize"] = None
 
         def task():
             try:
+                # Safe read-only file operations on thread
                 im = Image.open(self.current_preview_file)
+                im = ImageOps.exif_transpose(im) # Correct EXIF rotation
                 
-                # We need to maintain aspect ratio for preview and keep it small
+                # Critical Fix: Speed up preview by downscaling immediately (resolves preview lag on large images)
+                im.thumbnail((800, 800), Image.Resampling.LANCZOS)
+                
                 preview_size = (400, 400)
                 
                 # Simulated Resize impact
                 try:
-                    w_str, h_str = self.resize_width.get().strip(), self.resize_height.get().strip()
+                    w_str, h_str = params["res_w_str"], params["res_h_str"]
                     res_dim = get_resize_dimensions(im.size, w_str, h_str)
                     if res_dim:
-                        if params["mode"] == "Fit (Maintain AR)": im = ImageOps.contain(im, res_dim, Image.LANCZOS)
-                        elif params["mode"] == "Fill/Crop": im = ImageOps.fit(im, res_dim, Image.LANCZOS)
-                        else: im = im.resize(res_dim, Image.LANCZOS)
+                        if params["mode"] == "Fit (Maintain AR)": im = ImageOps.contain(im, res_dim, Image.Resampling.LANCZOS)
+                        elif params["mode"] == "Fill/Crop": im = ImageOps.fit(im, res_dim, Image.Resampling.LANCZOS)
+                        else: im = im.resize(res_dim, Image.Resampling.LANCZOS)
                 except: pass
 
-                im.thumbnail(preview_size, Image.LANCZOS)
+                im.thumbnail(preview_size, Image.Resampling.LANCZOS)
                 
                 # Filters
                 if params["f_gray"]: im = im.convert("L")
@@ -610,7 +640,7 @@ class FormatoApp(BaseClass):
                     ico_images, ico_sizes, files = [], [], [f"{base_name}.ico"]
 
                     for size in selected_sizes:
-                        resized = base_img.resize(size, Image.LANCZOS)
+                        resized = base_img.resize(size, Image.Resampling.LANCZOS)
                         resized.save(save_folder / f"{base_name}-{size[0]}x{size[1]}.png", "PNG")
                         files.append(f"{base_name}-{size[0]}x{size[1]}.png")
                         ico_images.append(resized.convert("RGB") if size[0] <= 48 else resized)
@@ -636,9 +666,26 @@ class FormatoApp(BaseClass):
             if new and not self.current_preview_file:
                 self.set_preview_image(new[0])
 
+    def remove_single_file(self, filepath):
+        if filepath in self.selected_files:
+            self.selected_files.remove(filepath)
+            if filepath in self.thumbnails:
+                del self.thumbnails[filepath]
+            
+            if self.current_preview_file == filepath:
+                self.current_preview_file = None
+                self._current_ctk_image = None
+                self.preview_label.configure(image="", text="Select a file to preview")
+            
+            self.update_file_list()
+            # If the current preview was removed, fallback to the first item
+            if self.selected_files and not self.current_preview_file:
+                self.set_preview_image(self.selected_files[0])
+
     def clear_files(self):
         self.selected_files.clear()
         self.progress_bars.clear()
+        self.thumbnails.clear()
         self.current_preview_file = None
         self._current_ctk_image = None
         self.preview_label.configure(image="", text="Select a file to preview")
@@ -649,20 +696,41 @@ class FormatoApp(BaseClass):
         for w in self.file_listbox.winfo_children():
             w.destroy()
         self.progress_bars.clear()
+        self.thumbnails.clear()
 
         for fp in self.selected_files:
             p = Path(fp)
             frame = ctk.CTkFrame(self.file_listbox, fg_color="#1E1E1E")
             frame.pack(fill="x", pady=2, padx=2)
 
+            # Generate and hold a small thumbnail securely (resolves file list thumbnail feature)
+            ctk_thumb = None
+            try:
+                with Image.open(fp) as thumb_im:
+                    thumb_im = ImageOps.exif_transpose(thumb_im)
+                    thumb_im.thumbnail((40, 40), Image.Resampling.LANCZOS)
+                    ctk_thumb = ctk.CTkImage(thumb_im, size=(40, 40))
+                    self.thumbnails[fp] = ctk_thumb  # Prevent GC
+            except:
+                pass
+
+            if ctk_thumb:
+                img_lbl = ctk.CTkLabel(frame, image=ctk_thumb, text="")
+                img_lbl.pack(side="left", padx=(5, 10))
+                img_lbl.bind("<Button-1>", lambda e, f=fp: self.set_preview_image(f))
+
             # Make row clickable for preview
             lbl = ctk.CTkLabel(frame, text=p.name, anchor="w", font=ctk.CTkFont(weight="bold"))
-            lbl.pack(side="left", padx=10, pady=5)
+            lbl.pack(side="left", fill="x", expand=True, padx=5, pady=5)
             lbl.bind("<Button-1>", lambda e, f=fp: self.set_preview_image(f))
             frame.bind("<Button-1>", lambda e, f=fp: self.set_preview_image(f))
 
+            # Remove single file button
+            remove_btn = ctk.CTkButton(frame, text="❌", width=30, height=24, fg_color="#5C3A3A", hover_color="#7A4C4C", command=lambda f=fp: self.remove_single_file(f))
+            remove_btn.pack(side="right", padx=10)
+
             pb = ctk.CTkProgressBar(frame, width=80, height=8)
-            pb.pack(side="right", padx=10)
+            pb.pack(side="right", padx=5)
             pb.set(0)
             self.progress_bars[fp] = pb
 
@@ -682,8 +750,8 @@ class FormatoApp(BaseClass):
             "wm_pos": self.wm_pos.get(),
             "wm_size": self.wm_size.get(),
             "wm_opacity": self.wm_opacity.get(),
-            "wm_margin_x": int(self.wm_margin_x.get()) if self.wm_margin_x.get().isdigit() else 10,
-            "wm_margin_y": int(self.wm_margin_y.get()) if self.wm_margin_y.get().isdigit() else 10,
+            "wm_margin_x": parse_int(self.wm_margin_x.get(), 10),
+            "wm_margin_y": parse_int(self.wm_margin_y.get(), 10),
             "pref": self.rename_prefix.get().strip(),
             "suff": self.rename_suffix.get().strip(),
             "f_gray": self.filter_gray.get(),
@@ -696,15 +764,36 @@ class FormatoApp(BaseClass):
             "smart": self.smart_compress.get(),
             "target_kb": int(self.target_kb.get()) if self.target_kb.get().isdigit() else 500,
             "meta_en": self.meta_enable.get(),
-            "meta_auth": self.meta_author.get()
+            "meta_auth": self.meta_author.get(),
+            "meta_copy": self.meta_copyright.get().strip(),
+            "meta_desc": self.meta_description.get().strip(),
+            "res_w_str": self.resize_width.get().strip(),
+            "res_h_str": self.resize_height.get().strip(),
         }
 
     def start_conversion(self):
+        # 1. Validation: Check Queue
         if not self.selected_files:
-            messagebox.showwarning("Warning", "No files selected!")
+            messagebox.showwarning("Validation Error", "No files selected in Queue!")
             return
-        if not self.output_folder.get():
-            messagebox.showwarning("Warning", "Please select an output folder!")
+            
+        # 2. Validation: Check Output folder selection
+        out_dir_str = self.output_folder.get().strip()
+        if not out_dir_str:
+            messagebox.showwarning("Validation Error", "Please select an output folder first!")
+            return
+            
+        # 3. Validation: Verify destination directory and write access
+        out_dir = Path(out_dir_str)
+        try:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            # Create/delete a hidden test file to guarantee write access
+            test_file = out_dir / f".test_write_{int(time.time())}"
+            test_file.touch()
+            test_file.unlink()
+        except Exception as e:
+            messagebox.showerror("Validation Error", f"Cannot write to the selected output folder!\nDetails: {e}")
+            self.reset_conversion_ui()
             return
 
         self.convert_btn.configure(state="disabled", text="⚙️ Processing...")
@@ -713,10 +802,9 @@ class FormatoApp(BaseClass):
         
         params = self._get_current_params()
 
-        # Validate resize
+        # Validate resize inputs
         try:
             w_str, h_str = self.resize_width.get().strip(), self.resize_height.get().strip()
-            # We delay calculating actual dimensions to convert_image because aspect ratio depends on each image
             params["res_w_str"] = w_str
             params["res_h_str"] = h_str
         except Exception as e:
@@ -736,7 +824,9 @@ class FormatoApp(BaseClass):
             
             new_name = in_p.stem
             if p["pref"] or p["suff"]:
-                new_name = f"{p['pref']}_{idx:03d}_{p['suff']}".strip("_")
+                pref_part = f"{p['pref']}_" if p["pref"] else ""
+                suff_part = f"_{p['suff']}" if p["suff"] else ""
+                new_name = f"{pref_part}{in_p.stem}_{idx:03d}{suff_part}"
                 
             out_p = p["out_dir"] / f"{new_name}.{ext}"
             
@@ -750,9 +840,10 @@ class FormatoApp(BaseClass):
             
             for future in concurrent.futures.as_completed(futures):
                 fp, res = future.result()
-                self.after(0, lambda f=fp, r=res: self.update_single_progress(f, r))
                 done += 1
+                self.after(0, lambda f=fp, r=res: self.update_single_progress(f, r))
                 self.after(0, lambda d=done: self.progress.set(d / total))
+                self.after(0, lambda d=done, t=total: self.status_label.configure(text=f"Processing ({d}/{t})...", text_color="orange"))
 
         self.after(0, self.finish_conversion)
 
@@ -772,8 +863,16 @@ class FormatoApp(BaseClass):
                 images = []
                 for fp in self.selected_files:
                     img = Image.open(fp)
-                    if img.mode != 'RGB':
+                    img = ImageOps.exif_transpose(img) # Correct EXIF rotation
+                    
+                    # Safe conversion of transparent backgrounds to solid white
+                    if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                        bg = Image.new("RGB", img.size, (255, 255, 255))
+                        bg.paste(img, mask=img.convert("RGBA").split()[-1])
+                        img = bg
+                    else:
                         img = img.convert('RGB')
+                        
                     images.append(img)
                     
                 if images:
@@ -816,6 +915,9 @@ def get_resize_dimensions(im_size, w_str, h_str):
 
 def apply_watermark(im, p):
     if p.get("wm") and os.path.exists(p["wm"]):
+        # Cache original mode (resolves grayscale watermark compatibility issue)
+        orig_mode = im.mode 
+        
         with Image.open(p["wm"]).convert("RGBA") as wm:
             # Calculate size
             target_w = int(im.size[0] * p["wm_size"])
@@ -825,7 +927,7 @@ def apply_watermark(im, p):
             target_h = int(float(wm.size[1]) * ratio)
             if target_h <= 0: return im
             
-            wm = wm.resize((target_w, target_h), Image.LANCZOS)
+            wm = wm.resize((target_w, target_h), Image.Resampling.LANCZOS)
             
             # Opacity
             if p["wm_opacity"] < 1.0:
@@ -856,56 +958,112 @@ def apply_watermark(im, p):
             layer.paste(wm, (x, y))
             im = Image.alpha_composite(im, layer)
             
-            if p["fmt"].upper() in ("JPEG", "JPG"):
+            # Restore to original workspace mode safely
+            if orig_mode == "L":
+                im = im.convert("L")
+            elif p["fmt"].upper() in ("JPEG", "JPG"):
                 im = im.convert("RGB")
     return im
 
 def convert_image(input_path, output_path, p):
     try:
+        is_gif = p["fmt"].upper() == "GIF"
+        
+        # 1. Advanced Frame-by-Frame Animated GIF Handling
+        if is_gif:
+            with Image.open(input_path) as im:
+                if getattr(im, "is_animated", False):
+                    frames = []
+                    durations = []
+                    for frame_idx in range(im.n_frames):
+                        im.seek(frame_idx)
+                        frame = im.copy()
+                        frame = ImageOps.exif_transpose(frame)
+                        
+                        # Apply base adjustments per frame
+                        if p["f_gray"]: frame = frame.convert("L")
+                        if p["f_auto"]:
+                            try: frame = ImageOps.autocontrast(frame.convert("RGB"))
+                            except: pass
+                        if p["f_sharp"]: frame = frame.filter(ImageFilter.SHARPEN)
+
+                        if p["adj_b"] != 1.0: frame = ImageEnhance.Brightness(frame).enhance(p["adj_b"])
+                        if p["adj_c"] != 1.0: frame = ImageEnhance.Contrast(frame).enhance(p["adj_c"])
+                        if p["adj_s"] != 1.0: frame = ImageEnhance.Color(frame).enhance(p["adj_s"])
+                        if p["adj_sh"] != 1.0: frame = ImageEnhance.Sharpness(frame).enhance(p["adj_sh"])
+
+                        res_dim = get_resize_dimensions(frame.size, p.get("res_w_str", ""), p.get("res_h_str", ""))
+                        if res_dim:
+                            if p["mode"] == "Fit (Maintain AR)": frame = ImageOps.contain(frame, res_dim, Image.Resampling.LANCZOS)
+                            elif p["mode"] == "Fill/Crop": frame = ImageOps.fit(frame, res_dim, Image.Resampling.LANCZOS)
+                            else: frame = frame.resize(res_dim, Image.Resampling.LANCZOS)
+
+                        frame = apply_watermark(frame, p)
+                        frames.append(frame)
+                        durations.append(im.info.get('duration', 100))
+                        
+                    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+                    frames[0].save(
+                        output_path,
+                        save_all=True,
+                        append_images=frames[1:],
+                        loop=im.info.get('loop', 0),
+                        duration=durations,
+                        optimize=True
+                    )
+                    return {"success": True}
+
+        # 2. Standard Image File Processing (JPEG, PNG, WEBP, etc.)
         with Image.open(input_path) as im:
-            # 1. Base Filters
+            im = ImageOps.exif_transpose(im) # Correct EXIF rotation
+            
+            # Base Filters
             if p["f_gray"]: im = im.convert("L")
             if p["f_auto"]:
                 try: im = ImageOps.autocontrast(im.convert("RGB"))
                 except: pass
             if p["f_sharp"]: im = im.filter(ImageFilter.SHARPEN)
 
-            # 2. Advanced Adjustments
+            # Advanced Adjustments
             if p["adj_b"] != 1.0: im = ImageEnhance.Brightness(im).enhance(p["adj_b"])
             if p["adj_c"] != 1.0: im = ImageEnhance.Contrast(im).enhance(p["adj_c"])
             if p["adj_s"] != 1.0: im = ImageEnhance.Color(im).enhance(p["adj_s"])
             if p["adj_sh"] != 1.0: im = ImageEnhance.Sharpness(im).enhance(p["adj_sh"])
 
-            # 3. Resize Logic
+            # Resize Logic
             res_dim = get_resize_dimensions(im.size, p.get("res_w_str", ""), p.get("res_h_str", ""))
             if res_dim:
-                if p["mode"] == "Fit (Maintain AR)": im = ImageOps.contain(im, res_dim, Image.LANCZOS)
-                elif p["mode"] == "Fill/Crop": im = ImageOps.fit(im, res_dim, Image.LANCZOS)
-                else: im = im.resize(res_dim, Image.LANCZOS)
+                if p["mode"] == "Fit (Maintain AR)": im = ImageOps.contain(im, res_dim, Image.Resampling.LANCZOS)
+                elif p["mode"] == "Fill/Crop": im = ImageOps.fit(im, res_dim, Image.Resampling.LANCZOS)
+                else: im = im.resize(res_dim, Image.Resampling.LANCZOS)
 
             kwargs = {}
             exif = im.info.get("exif") if p["exif"] and "exif" in im.info else None
             
-            # Custom Metadata implementation (Basic implementation for JPG/TIFF)
-            if p["meta_en"] and p["meta_auth"] and p["fmt"].upper() in ("JPEG", "JPG", "TIFF"):
+            # Robust Metadata expansion (Author + Copyright + Image Description EXIF compilation)
+            if p["meta_en"] and p["fmt"].upper() in ("JPEG", "JPG", "TIFF"):
                 if not exif:
                     exif = Image.Exif()
                 else:
                     exif = im.getexif()
-                # 315 is standard Artist/Author tag in EXIF
-                exif[315] = p["meta_auth"]
-                kwargs["exif"] = exif.tobytes()
+                if p["meta_auth"]: exif[315] = p["meta_auth"]     # EXIF Artist tag
+                if p.get("meta_copy"): exif[33432] = p["meta_copy"] # EXIF Copyright tag
+                if p.get("meta_desc"): exif[270] = p["meta_desc"]   # EXIF ImageDescription tag
+                try:
+                    kwargs["exif"] = exif.tobytes()
+                except:
+                    pass
             elif exif and p["fmt"].upper() in ("JPEG", "JPG"):
                 kwargs["exif"] = exif
 
-            # Ensure Correct Modes
+            # Ensure Correct Modes for formats without transparency
             if p["fmt"].upper() in ("JPEG", "JPG") and im.mode in ("RGBA", "LA", "P"):
                 bg = Image.new("RGB", im.size, (255, 255, 255))
                 if im.mode == "P": im = im.convert("RGBA")
                 bg.paste(im, mask=im.split()[-1] if 'A' in im.getbands() else None)
                 im = bg
 
-            # 4. Watermark System
+            # Watermark System
             im = apply_watermark(im, p)
 
             # Output Formatting
@@ -916,7 +1074,7 @@ def convert_image(input_path, output_path, p):
 
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)
             
-            # Smart Compression Binary Search
+            # Zero-disk Smart Compression loop purely in RAM to protect SSD life
             if p["smart"] and p["fmt"].upper() in ("JPEG", "JPG", "WEBP"):
                 low, high = 10, 100
                 best_quality = p["qual"]
@@ -925,8 +1083,9 @@ def convert_image(input_path, output_path, p):
                 for _ in range(7):  # Max 7 steps for binary search
                     mid = (low + high) // 2
                     kwargs["quality"] = mid
-                    im.save(output_path, p["fmt"], **kwargs)
-                    size = os.path.getsize(output_path)
+                    buf = io.BytesIO()
+                    im.save(buf, p["fmt"], **kwargs)
+                    size = buf.tell()
                     
                     if size <= target_bytes:
                         best_quality = mid
