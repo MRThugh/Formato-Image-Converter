@@ -114,10 +114,10 @@ Designed and developed by [MRThugh](https://github.com/MRThugh), Formato demonst
 To run Formato locally, clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/MRThugh/Formato.git
-cd Formato
+git clone https://github.com/MRThugh/Formato-Image-Converter.git
+cd Formato-Image-Converter
 pip install -r requirements.txt
-python formato.py
+python main.py
 ```
 
 ---
