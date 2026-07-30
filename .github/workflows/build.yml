@@ -1,5 +1,8 @@
 name: Build Multi-Platform Executables & Installers
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ "main", "master" ]
