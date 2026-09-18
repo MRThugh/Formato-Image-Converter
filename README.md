@@ -22,6 +22,7 @@ The codebase has been refactored into a clean, modular architecture. This separa
 - **Live Interactive Preview:** Pan (drag) and zoom (scroll) on an interactive graphics scene with integrated RAM image caching to deliver fast, real-time feedback.
 - **PDF Builder:** Merge selected queue images into a single, multi-page PDF document.
 - **Icon & Favicon Generator:** Generate individual resolution assets for web or app platforms and compile them into a unified multi-size `.ico` file.
+- **Live Queue Counter:** Real-time file counter in the Queue header for clearer queue visibility.
 
 ---
 
@@ -94,6 +95,20 @@ python main.py
 2. **Configure Settings:** Choose your destination format, resize parameters, rename rules (prefix/suffix), and any desired filters.
 3. **Save/Load Presets:** Easily export your preferred settings configurations via `Save Preset` as a JSON file, and reload them later using `Load Preset`.
 4. **Choose Destination:** Specify your output directory, then click `🚀 START PROCESSING` to run the concurrent batch converter.
+
+---
+
+## 📝 Changelog
+
+### [2.5.1] — Minor UI Update
+
+#### Changed
+- Added a live file counter to the Queue header (`Queue · X Files`).
+- The Queue title now displays the current number of files waiting for conversion with proper singular/plural grammar.
+- Improved queue visibility without changing the existing workflow.
+
+#### Fixed
+- No functional bugs were intentionally changed in this release.
 
 ---
 

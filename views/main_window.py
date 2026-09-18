@@ -64,6 +64,11 @@ class FormatoApp(QMainWindow):
         self.batch_finished.connect(self.finish_conversion)
         self.preview_cache_ready.connect(self.trigger_preview_update)
 
+        self.queue_model.rowsInserted.connect(self.update_queue_counter)
+        self.queue_model.rowsRemoved.connect(self.update_queue_counter)
+        self.queue_model.modelReset.connect(self.update_queue_counter)
+        self.update_queue_counter()
+
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -219,9 +224,20 @@ class FormatoApp(QMainWindow):
         queue_layout = QVBoxLayout(queue_card)
         queue_layout.setContentsMargins(15, 15, 15, 15)
         
-        q_title = QLabel("Queue (Drag & Drop Supported)")
-        q_title.setStyleSheet("font-size: 15px; font-weight: bold;")
-        queue_layout.addWidget(q_title)
+        queue_header_layout = QHBoxLayout()
+        queue_header_layout.setContentsMargins(0, 0, 0, 0)
+        queue_header_layout.setSpacing(8)
+
+        self.queue_title = QLabel("Queue · 0 Files")
+        self.queue_title.setStyleSheet("font-size: 15px; font-weight: bold;")
+        queue_header_layout.addWidget(self.queue_title)
+
+        self.queue_subtitle = QLabel("(Drag & Drop Supported)")
+        self.queue_subtitle.setStyleSheet("color: #7C7C82; font-size: 12px;")
+        queue_header_layout.addWidget(self.queue_subtitle)
+
+        queue_header_layout.addStretch()
+        queue_layout.addLayout(queue_header_layout)
 
         self.queue_view = QListView()
         self.queue_view.setModel(self.queue_model)
@@ -962,6 +978,7 @@ class FormatoApp(QMainWindow):
         self.preview_canvas.scene.clear()
         self.preview_canvas.pixmap_item = QGraphicsPixmapItem()
         self.preview_canvas.scene.addItem(self.preview_canvas.pixmap_item)
+        self.update_queue_counter()
 
     def select_watermark(self):
         file, _ = QFileDialog.getOpenFileName(self, "Select Logo (PNG)", "", "PNG Files (*.png)")
@@ -992,6 +1009,12 @@ class FormatoApp(QMainWindow):
             idx_num = self.selected_files.index(self.current_preview_file)
             idx = self.queue_model.index(idx_num, 0)
             self.queue_view.setCurrentIndex(idx)
+        self.update_queue_counter()
+
+    def update_queue_counter(self, *args):
+        count = self.queue_model.rowCount()
+        file_text = "1 File" if count == 1 else f"{count} Files"
+        self.queue_title.setText(f"Queue · {file_text}")
 
     def _get_current_params(self):
         return {
