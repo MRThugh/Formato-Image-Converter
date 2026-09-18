@@ -9,6 +9,7 @@ from models.queue_model import QueueModel
 
 class ClickableLabel(QLabel):
     double_clicked = Signal()
+
     def mouseDoubleClickEvent(self, event):
         self.double_clicked.emit()
         super().mouseDoubleClickEvent(event)
@@ -26,14 +27,14 @@ class SmoothScrollArea(QScrollArea):
             return
 
         delta = event.angleDelta().y()
-        step_multiplier = 85  
+        step_multiplier = 85
         target_value = scrollbar.value() - (delta / 120) * step_multiplier
         target_value = max(scrollbar.minimum(), min(target_value, scrollbar.maximum()))
 
         if self._scroll_anim is None:
             self._scroll_anim = QPropertyAnimation(scrollbar, b"value")
             self._scroll_anim.setEasingCurve(QEasingCurve.OutCubic)
-            self._scroll_anim.setDuration(240)  
+            self._scroll_anim.setDuration(240)
 
         self._scroll_anim.stop()
         self._scroll_anim.setStartValue(scrollbar.value())
@@ -49,7 +50,7 @@ class GraphicsPreviewView(QGraphicsView):
         self.setScene(self.scene)
         self.pixmap_item = QGraphicsPixmapItem()
         self.scene.addItem(self.pixmap_item)
-        
+
         self.setRenderHint(QPainter.Antialiasing)
         self.setRenderHint(QPainter.SmoothPixmapTransform)
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
@@ -57,7 +58,7 @@ class GraphicsPreviewView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setStyleSheet("background-color: #111111; border: 1px dashed #2E2E2E; border-radius: 6px;")
-        
+
     def set_pixmap(self, pixmap):
         self.pixmap_item.setPixmap(pixmap)
         self.scene.setSceneRect(self.pixmap_item.boundingRect())
@@ -67,7 +68,7 @@ class GraphicsPreviewView(QGraphicsView):
         super().resizeEvent(event)
         if self.pixmap_item and not self.pixmap_item.pixmap().isNull():
             self.fitInView(self.pixmap_item, Qt.KeepAspectRatio)
-        
+
     def wheelEvent(self, event: QWheelEvent):
         if not self.pixmap_item.pixmap().isNull():
             zoom_factor = 1.15
@@ -85,9 +86,9 @@ class QueueDelegate(QStyledItemDelegate):
         painter.save()
         painter.setRenderHint(QPainter.Antialiasing)
 
-        name = index.data(Qt.DisplayRole)
-        status = index.data(QueueModel.StatusRole)
-        progress = index.data(QueueModel.ProgressRole)
+        name = index.data(Qt.DisplayRole) or ""
+        status = (index.data(QueueModel.StatusRole) or "waiting").lower()
+        progress = index.data(QueueModel.ProgressRole) or 0
         thumbnail = index.data(QueueModel.ThumbnailRole)
 
         is_hovered = option.state & QStyle.State_MouseOver
@@ -107,6 +108,7 @@ class QueueDelegate(QStyledItemDelegate):
         painter.setPen(QPen(border_color, 1))
         painter.drawRoundedRect(rect.adjusted(2, 2, -2, -2), 6, 6)
 
+        # Thumbnail box
         thumb_rect = rect.adjusted(10, 6, 10, 6)
         thumb_rect.setWidth(40)
         thumb_rect.setHeight(40)
@@ -122,12 +124,18 @@ class QueueDelegate(QStyledItemDelegate):
             painter.setFont(font)
             painter.drawText(thumb_rect, Qt.AlignCenter, "IMG")
 
-        text_rect = rect.adjusted(60, 6, -110, -6)
-        painter.setPen(QColor("#FFFFFF") if is_selected else QColor("#CCCCCC"))
+        # Filename text
+        text_rect = rect.adjusted(60, 6, -150, -6)
+        painter.setPen(QColor("#FFFFFF") if is_selected else QColor("#D0D0D4"))
         font = painter.font()
         font.setBold(True)
         painter.setFont(font)
         painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, name)
+
+        # Status indicator
+        font.setBold(False)
+        font.setPointSize(10)
+        painter.setFont(font)
 
         if status == "processing":
             pb_rect = rect.adjusted(rect.width() - 170, 22, -40, -22)
@@ -141,15 +149,24 @@ class QueueDelegate(QStyledItemDelegate):
                 active_rect.setWidth(chunk_width)
                 painter.setBrush(QColor("#0A84FF"))
                 painter.drawRoundedRect(active_rect, 3, 3)
-        elif status == "success":
-            status_rect = rect.adjusted(rect.width() - 160, 6, -40, -6)
+        elif status in ("completed", "success"):
+            status_rect = rect.adjusted(rect.width() - 150, 6, -40, -6)
             painter.setPen(QColor("#30D158"))
-            painter.drawText(status_rect, Qt.AlignVCenter | Qt.AlignRight, "Done")
+            painter.drawText(status_rect, Qt.AlignVCenter | Qt.AlignRight, "Completed")
         elif status == "failed":
-            status_rect = rect.adjusted(rect.width() - 160, 6, -40, -6)
+            status_rect = rect.adjusted(rect.width() - 150, 6, -40, -6)
             painter.setPen(QColor("#FF453A"))
             painter.drawText(status_rect, Qt.AlignVCenter | Qt.AlignRight, "Failed")
+        elif status == "cancelled":
+            status_rect = rect.adjusted(rect.width() - 150, 6, -40, -6)
+            painter.setPen(QColor("#FF9F0A"))
+            painter.drawText(status_rect, Qt.AlignVCenter | Qt.AlignRight, "Cancelled")
+        else:  # waiting / pending
+            status_rect = rect.adjusted(rect.width() - 150, 6, -40, -6)
+            painter.setPen(QColor("#7C7C82"))
+            painter.drawText(status_rect, Qt.AlignVCenter | Qt.AlignRight, "Waiting")
 
+        # Delete '×' button
         delete_rect = rect.adjusted(rect.width() - 30, 16, -15, -16)
         if is_hovered:
             painter.setPen(QColor("#FF453A"))

@@ -1,0 +1,8 @@
+{
+  "name": "Formato - Desktop Image Studio",
+  "description": "Professional native Desktop application built with Python 3.11+, PySide6 (Qt6), Pillow, and PyInstaller.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

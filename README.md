@@ -1,129 +1,174 @@
-# Formato - Professional Image Studio 🎨✨
+# Formato — Professional Desktop Image Studio
 
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Framework](https://img.shields.io/badge/framework-PySide6%20%2F%20Qt6-brightgreen.svg)](https://wiki.qt.io/Qt_for_Python)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+<p align="center">
+  <img src="assets/logo.png" alt="Formato Logo" width="128" height="128">
+</p>
 
-[**Formato**](https://github.com/MRThugh/Formato-Image-Converter) is a versatile, modern desktop application designed for batch image processing, optimization, and conversion. Built using the powerful **PySide6** (Qt for Python) framework and the **Pillow (PIL)** imaging library, it provides an efficient, lightweight, and responsive workspace for creators and developers alike.
+<p align="center">
+  <strong>High-performance, Native Cross-Platform Desktop Image Processing & Conversion Studio</strong><br>
+  Built with Python 3.11+, PySide6 (Qt6), and Pillow.
+</p>
 
-The codebase has been refactored into a clean, modular architecture. This separation of concerns improves performance, code readability, and makes it easily extensible for future feature integrations.
-
----
-
-## 🚀 Core Features
-
-- **Batch Processing:** Concurrently convert files to widely-used formats including `JPEG`, `PNG`, `WEBP`, `TIFF`, `BMP`, and `GIF`.
-- **Smart Compression:** Adjust output quality manually or utilize smart compression to automatically approximate a target file size (in KB) using an efficient iterative search algorithm.
-- **Smart Resizing:** Resize images using Stretch, Fit (maintain aspect ratio), or Fill/Crop modes.
-- **Advanced Adjustments:** Fine-tune brightness, contrast, saturation, and sharpness using smooth sliders. Double-click any label to quickly reset its value.
-- **Visual Filters:** Apply pre-defined filters such as Grayscale, Auto-Contrast, Sharpen, Blur, Contour, Emboss, and Edge Enhance.
-- **Metadata Management:** Preserve original EXIF data or write custom metadata (Author, Copyright, and Description) to supported formats.
-- **Advanced Watermarking:** Load a PNG logo watermark, adjust its position (5 placement zones), scale, opacity, and custom pixel margins.
-- **Live Interactive Preview:** Pan (drag) and zoom (scroll) on an interactive graphics scene with integrated RAM image caching to deliver fast, real-time feedback.
-- **PDF Builder:** Merge selected queue images into a single, multi-page PDF document.
-- **Icon & Favicon Generator:** Generate individual resolution assets for web or app platforms and compile them into a unified multi-size `.ico` file.
-- **Live Queue Counter:** Real-time file counter in the Queue header for clearer queue visibility.
+<p align="center">
+  <a href="https://github.com/MRThugh/Formato-Image-Converter"><img src="https://img.shields.io/badge/GitHub-MRThugh%2FFormato--Image--Converter-blue?logo=github" alt="GitHub Repo"></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/GUI-PySide6%20%2F%20Qt6-41CD52?logo=qt&logoColor=white" alt="PySide6 / Qt6">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Cross-Platform">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+</p>
 
 ---
 
-## 🛠 Tech Stack
+## 🌟 Overview
 
-- **Core Language:** Python 3.10+
-- **Graphical User Interface:** PySide6 (Qt6) with a customized, premium dark QSS theme.
-- **Image Manipulation:** Pillow (PIL)
-- **Concurrency:** Built-in multi-threading utilizing `ThreadPoolExecutor` to handle background image processing and thumbnail rendering, ensuring the main GUI remains responsive and lag-free.
+**Formato** is a native, professional desktop application engineered for batch image conversion, smart compression, color grading, watermarking, multi-resolution icon authoring, and multi-page PDF compilation.
+
+Unlike browser-based wrappers or heavy electron apps, Formato runs **100% locally and natively** on your machine with minimal resource overhead, thread-safe asynchronous execution, and real-time live previewing.
 
 ---
 
-## 📂 Project Architecture
+## ✨ Key Features
 
-The repository is organized following clean-coding principles to separate data, logic, and interface elements:
+### 🗂 Batch Image Converter
+- **Multi-Format Support**: High-fidelity conversion across **JPEG, PNG, WEBP, TIFF, BMP, and GIF**.
+- **Collision-Safe Export**: Never overwrites existing files — automatically resolves duplicate filenames cleanly (`photo_1.webp`, `photo_2.webp`) with atomic write protection.
+- **Smart Compression**: Intelligent binary search algorithm to target specific file sizes (e.g. 150 KB) without manual trial-and-error.
+- **Aspect-Ratio Resizing**:
+  - **Fit**: Constrains inside a bounding box while strictly maintaining aspect ratio.
+  - **Fill / Crop**: Centers and crops edges to achieve an exact dimensional canvas.
+  - **Stretch**: Scaled directly to specified pixel bounds.
+- **Color & Tonal Grading**: Real-time Brightness, Contrast, Saturation, and Sharpness controls.
+- **Artistic & Utility Filters**: Grayscale, Auto-Contrast, Edge Enhancement, Sharpen, Blur, Contour, and Emboss.
+- **Visual Watermarking**: Real-time PNG watermark overlays with opacity, size scaling, and margin offsets.
+- **EXIF & Metadata Engine**: Preserve original camera EXIF or inject custom Author, Copyright, and Description tags.
+- **Thread-Safe Queue & Live Counter**: Visual progress tracking, item deletion, and real-time counter (`Queue · 5 Files`).
+- **Instant Cancellation**: Interrupt batch jobs safely at any moment without leaving corrupted or half-written files.
 
-```text
-formato_project/
-│
-├── assets/                    # Static assets (logos, icons, and favicon.ico)
-│   ├── logo.png
-│   └── icon.ico
-│
-├── core/                      # Image processing core using Pillow algorithms
-│   ├── __init__.py
-│   └── image_processor.py
-│
-├── models/                    # Data representations and Model-View architectures
-│   ├── __init__.py
-│   └── queue_model.py
-│
-├── views/                     # UI components, custom widgets, and windows
-│   ├── __init__.py
-│   ├── widgets.py             # Zoomable canvas, smooth scroll area, and delegate rendering
-│   └── main_window.py         # Primary window controller and interface setups
-│
-├── config.py                  # Static configurations, file paths, and CSS stylesheets
-├── utils.py                   # General-purpose utility and mathematical helpers
-├── requirements.txt           # Project dependencies
-└── main.py                    # Application entry point
+### 📄 Multi-Page PDF Builder
+- Memory-efficient image-to-PDF compilation.
+- Supports **A4, A5, Letter, and Original** page sizes with custom orientation (Portrait / Landscape), Fit/Fill sizing, and configurable page margins.
+
+### 🎨 Icon & Favicon Generator
+- Master image downsampling into multi-resolution Windows `.ico` files containing embedded 16×16, 32×32, 48×48, 64×64, 128×128, and 256×256 px mipmaps.
+
+### 💾 Preset Management
+- Save and load complete workspace configurations to portable `.json` files.
+
+---
+
+## 🏗 Native Desktop Architecture
+
+```
+Formato/
+├── core/                       # Core Image Processing Engine
+│   ├── pipeline.py             # Single unified processing pipeline (Preview & Batch)
+│   ├── watermark.py            # Watermark overlay calculation & safe coordinate clamping
+│   ├── pdf_builder.py          # Memory-efficient multi-page PDF generation
+│   └── icon_builder.py         # Multi-size Windows .ico generator
+├── models/                     # Data Models & Qt Models
+│   ├── conversion_settings.py  # Dataclass with validation & clamping
+│   └── queue_model.py          # Thread-safe QAbstractListModel with thumbnail caching
+├── views/                      # Native Qt6 User Interface
+│   ├── main_window.py          # Main Window, Sidebar navigation, and Workspaces
+│   └── widgets.py              # Custom Qt Widgets & Item Delegates
+├── workers/                    # Asynchronous Threading
+│   ├── conversion_worker.py    # QThread batch processing with Signal/Slot communication
+│   ├── preview_worker.py       # Debounced, cancellable live preview worker
+│   └── pdf_worker.py           # Background PDF export worker
+├── utils/                      # Utilities & Helpers
+│   ├── paths.py                # Cross-platform asset, log, and runtime path resolver
+│   ├── logging.py              # Centralized logging engine
+│   ├── filenames.py            # Collision-proof unique output paths & atomic file writes
+│   └── helpers.py              # Dimension math and conversions
+├── assets/                     # Application Icons and Branding
+├── tests/                      # Automated Unit Test Suite (30 Tests)
+├── config.py                   # Centralized Configuration & Dark QSS Theme
+├── formato.spec                # PyInstaller executable specification
+└── main.py                     # Native desktop entry point
 ```
 
+### Threading & Safety Guarantees
+- **No UI Touches from Background Threads**: Worker threads communicate strictly via Qt Signals (`file_progress`, `file_completed`, `overall_progress`, `batch_finished`).
+- **Atomic Disk Writes**: Files are written to hidden temporary files first and atomically swapped upon successful completion.
+- **Safe Watermark Clamping**: Watermarks larger than the target canvas are scaled down dynamically, eliminating coordinate overflow bugs.
+
 ---
 
-## 📦 Installation & Setup
+## 🚀 Installation & Local Execution
 
-Ensure you have Python 3.10 or higher installed on your system.
+### Prerequisites
+- Python 3.11 or higher
+- `pip`
 
-1. Clone the repository:
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/MRThugh/Formato-Image-Converter.git
 cd Formato-Image-Converter
 ```
 
-2. Install the required dependencies:
+### 2. Set Up a Virtual Environment (Recommended)
 ```bash
+python3 -m venv venv
+# Linux / macOS:
+source venv/bin/activate
+# Windows:
+.\venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-3. Launch the application:
+### 4. Run the Application
 ```bash
 python main.py
 ```
 
 ---
 
-## ⚙️ How to Use
+## 🧪 Running the Test Suite
 
-1. **Manage the Queue:** Add files using the `➕ Add Files` button or drag-and-drop images directly into the interface. Click any item to display its real-time preview. To remove an image, click the red deletion mark (`×`) on the right side of the queue item.
-2. **Configure Settings:** Choose your destination format, resize parameters, rename rules (prefix/suffix), and any desired filters.
-3. **Save/Load Presets:** Easily export your preferred settings configurations via `Save Preset` as a JSON file, and reload them later using `Load Preset`.
-4. **Choose Destination:** Specify your output directory, then click `🚀 START PROCESSING` to run the concurrent batch converter.
+Formato includes a comprehensive test suite covering all image transformations, smart compression, EXIF preservation, filename collisions, watermark clamping, and PDF compilation:
 
----
-
-## 📝 Changelog
-
-### [2.5.1] — Minor UI Update
-
-#### Changed
-- Added a live file counter to the Queue header (`Queue · X Files`).
-- The Queue title now displays the current number of files waiting for conversion with proper singular/plural grammar.
-- Improved queue visibility without changing the existing workflow.
-
-#### Fixed
-- No functional bugs were intentionally changed in this release.
+```bash
+python -m unittest discover -s tests -v
+```
 
 ---
 
-## 🤝 Contributing
+## 📦 Building Standalone Executables (PyInstaller)
 
-Contributions make the open-source community a better place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+To build standalone, single-file or directory binaries for distribution:
 
-1. Fork the Project.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+### Using the Included PyInstaller Spec:
+```bash
+pip install pyinstaller
+pyinstaller formato.spec --noconfirm
+```
+
+The output executable will be placed in the `dist/` directory:
+- **Windows**: `dist/Formato.exe`
+- **Linux**: `dist/Formato`
+- **macOS**: `dist/Formato.app`
 
 ---
 
-## 📝 License
+## 🌐 Automated CI/CD & Releases
 
-Distributed under the MIT License. See the `LICENSE` file in the repository for more details.
+The repository includes a GitHub Actions workflow (`.github/workflows/build.yml`) that automatically:
+1. Runs the full unit test suite across Python 3.11.
+2. Builds native executables and installers:
+   - **Windows**: Inno Setup installer (`.exe`)
+   - **macOS**: Apple Disk Image (`.dmg`)
+   - **Linux**: Standalone `.tar.gz` archive
+3. Automatically publishes GitHub Releases with release assets whenever a version tag (e.g. `v2.6.0`) is pushed.
+
+---
+
+## 👨‍💻 Author & Credits
+
+- **Developer**: Ali Kamrani ([@MRThugh](https://github.com/MRThugh))
+- **Repository**: [MRThugh/Formato-Image-Converter](https://github.com/MRThugh/Formato-Image-Converter)
+- **License**: Released under the [MIT License](LICENSE).

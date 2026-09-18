@@ -1,20 +1,10 @@
 {
-  "name": "formato-image-converter",
+  "name": "formato-desktop",
+  "version": "2.6.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "description": "Formato - Native Python & PySide6 Desktop Image Converter",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "build": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "test": "python3 -m unittest discover -s tests -p 'test_*.py'"
   }
 }
